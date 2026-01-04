@@ -18,11 +18,10 @@ This project is for learning and demonstration purposes, not real signal measure
 
 ## Screenshots
 
-Main interface:
-<img src="images/ui-main.jpg" width="500">
+<img src="images/ui-main.jpg" width="400">
+<img src="images/ui-result.jpg" width="400">
 
-Result screen:
-<img src="images/ui-result.jpg" width="500">
+
 How to run the project
 
  1) Clone the repository
