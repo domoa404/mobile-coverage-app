@@ -22,7 +22,7 @@ This project is for learning and demonstration purposes, not real signal measure
 <img src="images/ui-result.jpg" width="400">
 
 
-##How to run the project
+How to run the project
 
  1) Clone the repository
 ```bash
