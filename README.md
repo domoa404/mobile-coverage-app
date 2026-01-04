@@ -1,27 +1,24 @@
-Mobile Coverage Analyzer 
+Mobile Coverage Analyzer is a small web application built with Python (Flask),
+with a simple HTML interface.
 
-This is a simple web application built with Python using Flask,
-with an HTML-based interface.
+The purpose of this app is to demonstrate how mobile network performance
+can change based on real-world conditions, rather than treating signal strength
+as a fixed value.
 
-It explains, in a practical way, why mobile network signal
-can be strong in one place and weak in another.
+The user can adjust parameters such as environment, distance from the cell tower,
+walls and obstacles, mobility, and network type.
+Based on these inputs, the system produces a rule-based estimation of
+signal quality, latency, and connection stability.
 
-The app works by letting the user change common real-world factors
-such as location, distance from the cell tower, walls, movement,
-and network type (3G / 4G / 5G / Wi-Fi).
+This approach helps translate theoretical concepts from Mobile Computing
+into a visual and interactive form.
 
-Based on these inputs, the system estimates signal quality
-and shows how different conditions affect network performance.
+The application is intended for learning and demonstration purposes,
+not for real signal measurement.
 
-This is an educational demo,
-not a real signal measurement tool.
 
-Source code and run instructions:
-https://github.com/domoa404/mobile-coverage-app
-
-Originally created as an assignment
+Originally developed as an assignment
 for the Mobile Computing course.
-
 
 
 ## Screenshots
