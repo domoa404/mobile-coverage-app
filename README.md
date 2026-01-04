@@ -35,3 +35,11 @@ python app.py
 Open your browser and go to:
 
 http://127.0.0.1:5000
+
+## Screenshots
+
+Main interface:
+<img src="images/ui-main.jpg" width="500">
+
+Result screen:
+<img src="images/ui-result.jpg" width="500">
