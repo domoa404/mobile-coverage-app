@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mobile Coverage Analyzer</title>
+
+  <style>
+    :root{
+      /* luxe vivid palette */
+      --ink:#0b1220;
+      --muted:#475569;
+      --muted2:#64748b;
+
+      --glass: rgba(255,255,255,.78);
+      --glass2: rgba(255,255,255,.62);
+      --stroke: rgba(15,23,42,.10);
+      --shadow: 0 22px 60px rgba(2, 6, 23, .14);
+
+      --a1:#7c3aed;  /* violet */
+      --a2:#06b6d4;  /* cyan */
+      --a3:#22c55e;  /* emerald */
+      --a4:#f97316;  /* orange */
+      --a5:#ec4899;  /* pink */
+
+      --radius:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 550px at 10% 0%, rgba(124,58,237,.26), transparent 60%),
+        radial-gradient(900px 550px at 95% 20%, rgba(6,182,212,.22), transparent 60%),
+        radial-gradient(900px 550px at 30% 110%, rgba(236,72,153,.18), transparent 60%),
+        radial-gradient(900px 550px at 80% 120%, rgba(34,197,94,.16), transparent 60%),
+        linear-gradient(135deg, #f6f7ff, #f7fffb);
+      overflow-x:hidden;
+    }
+
+    /* subtle grain for premium feel */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    }
+
+    /* animated glow orbs */
+    .orb{
+      position: fixed;
+      width: 520px; height: 520px;
+      border-radius: 999px;
+      filter: blur(48px);
+      opacity: .35;
+      z-index: -1;
+      animation: float 12s ease-in-out infinite;
+      mix-blend-mode: multiply;
+    }
+    .orb.one{
+      top: -210px; left: -210px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,58,237,.95), transparent 60%),
+                  radial-gradient(circle at 70% 70%, rgba(236,72,153,.85), transparent 58%);
+    }
+    .orb.two{
+      bottom: -240px; right: -210px;
+      animation-duration: 14s;
+      background: radial-gradient(circle at 30% 30%, rgba(6,182,212,.95), transparent 60%),
+                  radial-gradient(circle at 70% 70%, rgba(34,197,94,.85), transparent 58%);
+    }
+    @keyframes float{
+      0%,100%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(26px,-18px) scale(1.05); }
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 34px auto;
+      padding: 0 18px;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:14px;
+      margin-bottom: 14px;
+    }
+    .title{
+      margin:0;
+      font-size: 26px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .95fr;
+      gap: 16px;
+    }
+    @media (max-width: 920px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position:relative;
+      overflow:hidden;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 28px 75px rgba(2, 6, 23, .16);
+    }
+
+    /* fancy border glow */
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: conic-gradient(from 180deg,
+        rgba(124,58,237,.22),
+        rgba(6,182,212,.20),
+        rgba(34,197,94,.18),
+        rgba(249,115,22,.16),
+        rgba(236,72,153,.20),
+        rgba(124,58,237,.22)
+      );
+      opacity:.55;
+      pointer-events:none;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      padding: 1px;
+    }
+
+    .inner{ position:relative; padding: 16px; }
+
+    .section{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 12px;
+    }
+    .section h2{
+      margin:0;
+      font-size: 14.5px;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .spark{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: linear-gradient(135deg, var(--a1), var(--a2), var(--a3));
+      box-shadow: 0 0 16px rgba(124,58,237,.25);
+    }
+    .meta{
+      font-size:12px;
+      color: var(--muted2);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.55);
+    }
+
+    /* inputs */
+    form .fields{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+    @media (max-width: 560px){ form .fields{ grid-template-columns: 1fr; } }
+
+    label{
+      display:block;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin: 2px 0 6px;
+    }
+
+    .select-wrap{ position:relative; }
+    .select-wrap::after{
+      content:"▾";
+      position:absolute;
+      right: 12px; top: 38px;
+      color: rgba(15,23,42,.55);
+      pointer-events:none;
+      font-size: 12px;
+    }
+
+    select{
+      width:100%;
+      padding: 12px 36px 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.90);
+      color: var(--ink);
+      outline:none;
+      transition: box-shadow .14s ease, border-color .14s ease, transform .14s ease;
+      appearance:none;
+    }
+    select:focus{
+      border-color: rgba(124,58,237,.35);
+      box-shadow:
+        0 0 0 5px rgba(124,58,237,.12),
+        0 0 0 10px rgba(6,182,212,.08);
+      transform: translateY(-1px);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top: 12px;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 850;
+      color: #0b1220;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 14px 30px rgba(2,6,23,.10);
+      position:relative;
+      overflow:hidden;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: linear-gradient(135deg, var(--a1), var(--a2), var(--a3), var(--a5));
+      opacity:.55;
+      pointer-events:none;
+      mix-blend-mode: overlay;
+    }
+    /* shimmer */
+    .btn::after{
+      content:"";
+      position:absolute; inset:-40% -70%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+      transform: rotate(18deg) translateX(-120%);
+      animation: shimmer 2.8s ease-in-out infinite;
+      opacity:.55;
+    }
+    @keyframes shimmer{
+      0%{ transform: rotate(18deg) translateX(-120%); }
+      60%{ transform: rotate(18deg) translateX(120%); }
+      100%{ transform: rotate(18deg) translateX(120%); }
+    }
+    .btn span{ position:relative; z-index:1; }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    /* output */
+    .placeholder{
+      border-radius: 16px;
+      border: 1px dashed rgba(15,23,42,.18);
+      background: rgba(255,255,255,.62);
+      padding: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .ring{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      padding: 12px;
+    }
+    .ring svg{ width: 92px; height: 92px; }
+    .big{ margin:0; font-size: 18px; font-weight: 950; }
+    .small{ margin:4px 0 0; color: var(--muted); font-size: 12.5px; }
+
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat{
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.68);
+      padding: 12px;
+    }
+    .k{ font-size: 12px; color: var(--muted2); margin-bottom: 6px; }
+    .v{ font-size: 16px; font-weight: 900; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      margin-top: 12px;
+      font-size: 13px;
+      color: rgba(15,23,42,.78);
+    }
+    .dotq{
+      width:10px; height:10px; border-radius:999px;
+      background: var(--a3);
+      box-shadow: 0 0 14px rgba(34,197,94,.25);
+    }
+
+    ul{
+      margin: 10px 0 0 18px;
+      color: rgba(15,23,42,.86);
+    }
+    li{ margin: 6px 0; }
+
+    /* entry animation for results */
+    @keyframes popIn{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+    .result-animate{ animation: popIn .35s ease both; }
+  </style>
+</head>
+
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <div class="wrap">
+    <header>
+      <div>
+        <h1 class="title">Mobile Coverage Analyzer</h1>
+        <p class="sub">Rule-based estimate for signal strength, quality level, latency, and drop probability.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- INPUTS -->
+      <div class="card">
+        <div class="inner">
+          <div class="section">
+            <h2><span class="spark"></span> Inputs</h2>
+            <div class="meta">Configuration</div>
+          </div>
+
+          <form method="post">
+            <div class="fields">
+              <div>
+                <label>Environment</label>
+                <div class="select-wrap">
+                  <select name="env">
+                    <option value="home_indoor" {{ 'selected' if form_values.env=='home_indoor' else '' }}>Home (Indoor)</option>
+                    <option value="street_outdoor" {{ 'selected' if form_values.env=='street_outdoor' else '' }}>Street (Outdoor)</option>
+                    <option value="mall" {{ 'selected' if form_values.env=='mall' else '' }}>Mall</option>
+                    <option value="campus" {{ 'selected' if form_values.env=='campus' else '' }}>Campus</option>
+                    <option value="rural" {{ 'selected' if form_values.env=='rural' else '' }}>Rural</option>
+                    <option value="basement" {{ 'selected' if form_values.env=='basement' else '' }}>Basement</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label>Distance to Tower</label>
+                <div class="select-wrap">
+                  <select name="distance_cat">
+                    <option value="very_close" {{ 'selected' if form_values.distance_cat=='very_close' else '' }}>&lt; 200m</option>
+                    <option value="near" {{ 'selected' if form_values.distance_cat=='near' else '' }}>200–500m</option>
+                    <option value="medium" {{ 'selected' if form_values.distance_cat=='medium' else '' }}>500–1000m</option>
+                    <option value="far" {{ 'selected' if form_values.distance_cat=='far' else '' }}>&gt; 1000m</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label>Walls / Obstacles</label>
+                <div class="select-wrap">
+                  <select name="walls_cat">
+                    <option value="none" {{ 'selected' if form_values.walls_cat=='none' else '' }}>None</option>
+                    <option value="few" {{ 'selected' if form_values.walls_cat=='few' else '' }}>Few</option>
+                    <option value="many" {{ 'selected' if form_values.walls_cat=='many' else '' }}>Many</option>
+                    <option value="thick" {{ 'selected' if form_values.walls_cat=='thick' else '' }}>Thick / Concrete</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label>Mobility</label>
+                <div class="select-wrap">
+                  <select name="mobility">
+                    <option value="stationary" {{ 'selected' if form_values.mobility=='stationary' else '' }}>Stationary</option>
+                    <option value="walking" {{ 'selected' if form_values.mobility=='walking' else '' }}>Walking</option>
+                    <option value="car" {{ 'selected' if form_values.mobility=='car' else '' }}>Car</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label>Network</label>
+                <div class="select-wrap">
+                  <select name="network">
+                    <option value="3g" {{ 'selected' if form_values.network=='3g' else '' }}>3G</option>
+                    <option value="4g" {{ 'selected' if form_values.network=='4g' else '' }}>4G</option>
+                    <option value="5g" {{ 'selected' if form_values.network=='5g' else '' }}>5G</option>
+                    <option value="wifi" {{ 'selected' if form_values.network=='wifi' else '' }}>Wi-Fi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" type="submit"><span>Analyze</span></button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="card">
+        <div class="inner">
+          <div class="section">
+            <h2><span class="spark"></span> Output</h2>
+            <div class="meta">Results</div>
+          </div>
+
+          {% if result %}
+            <div class="ring result-animate" data-signal="{{ result.signal }}">
+              <svg viewBox="0 0 120 120" aria-label="Signal ring">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7c3aed"/>
+                    <stop offset="50%" stop-color="#06b6d4"/>
+                    <stop offset="100%" stop-color="#22c55e"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="44" fill="none" stroke="rgba(15,23,42,.14)" stroke-width="12"/>
+                <circle id="prog" cx="60" cy="60" r="44" fill="none" stroke="url(#grad)" stroke-width="12"
+                        stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="276.46"/>
+                <text x="60" y="64" text-anchor="middle" fill="#0b1220" font-size="22" font-weight="950" id="sigText">--</text>
+              </svg>
+              <div>
+                <p class="big">Signal Score</p>
+                <p class="small">{{ result.quality_desc }}</p>
+              </div>
+            </div>
+
+            <div class="stats result-animate">
+              <div class="stat">
+                <div class="k">Quality</div>
+                <div class="v" id="qv">{{ result.quality }}</div>
+              </div>
+              <div class="stat">
+                <div class="k">Latency</div>
+                <div class="v">{{ result.latency_ms }} ms</div>
+              </div>
+              <div class="stat">
+                <div class="k">Drop Probability</div>
+                <div class="v">{{ result.drop_prob }}</div>
+              </div>
+              <div class="stat">
+                <div class="k">Mobility Stability</div>
+                <div class="v">{{ result.mobility_label }}</div>
+              </div>
+            </div>
+
+            <div class="badge result-animate">
+              <span class="dotq" id="dotq"></span>
+              <span><b>{{ result.latency_label }}</b> • {{ result.latency_desc }}</span>
+            </div>
+
+            <div class="section" style="margin-top:14px;">
+              <h2 style="margin:0; font-size:14.5px;"><span class="spark"></span> Quick Advice</h2>
+              <div class="meta">Recommendations</div>
+            </div>
+
+            <ul class="result-animate">
+              {% for a in result.advice_list %}
+                <li>{{ a }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="placeholder">
+              <b>No results yet.</b><br/>
+              Run an analysis to display metrics and recommendations.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Progress ring animation + quality dot color
+    (function(){
+      const ring = document.querySelector(".ring");
+      if(!ring) return;
+
+      const signal = Number(ring.getAttribute("data-signal") || 0);
+      const circle = document.getElementById("prog");
+      const text = document.getElementById("sigText");
+      const C = 276.46;
+
+      const target = Math.max(0, Math.min(100, signal));
+      const offsetTarget = C * (1 - target/100);
+
+      let t = 0;
+      function step(){
+        t += 0.05;
+        const eased = 1 - Math.pow(1 - Math.min(1,t), 3);
+        circle.style.strokeDashoffset = (C - (C - offsetTarget)*eased).toFixed(2);
+        text.textContent = Math.round(target * eased);
+        if(t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+
+      const q = (document.getElementById("qv")?.textContent || "").toLowerCase();
+      const dot = document.getElementById("dotq");
+      if(dot){
+        let c = "#22c55e";         // good
+        if(q.includes("limited")) c = "#f59e0b"; // amber
+        if(q.includes("poor")) c = "#ef4444";    // red
+        dot.style.background = c;
+      }
+    })();
+  </script>
+</body>
+</html>
