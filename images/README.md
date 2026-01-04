@@ -1,0 +1,2 @@
+```md
+Screenshots folder
