@@ -17,8 +17,7 @@ The application is intended for learning and demonstration purposes,
 not for real signal measurement.
 
 
-Originally developed as an assignment
-for the Mobile Computing course.
+
 
 
 ## Screenshots
