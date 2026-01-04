@@ -15,6 +15,14 @@ It then shows signal quality, latency, and basic advice.
 
 This project is for learning and demonstration purposes, not real signal measurement.
 
+
+## Screenshots
+
+Main interface:
+<img src="images/ui-main.jpg" width="500">
+
+Result screen:
+<img src="images/ui-result.jpg" width="500">
 How to run the project
 
  1) Clone the repository
@@ -36,10 +44,3 @@ Open your browser and go to:
 
 http://127.0.0.1:5000
 
-## Screenshots
-
-Main interface:
-<img src="images/ui-main.jpg" width="500">
-
-Result screen:
-<img src="images/ui-result.jpg" width="500">
